@@ -17,3 +17,18 @@ Below command will generate verilog for the Incus SoC:
 ```shell
 $ sbt "runMain incus.Incus"
 ```
+
+## Simulation
+
+This repo contains some verilator simulations for Incus SoC. Those
+can be found in:
+
+```
+software/test/incus/
+```
+For running the simulation:
+
+```shell
+$ cd software/test/incus/
+$ make clean run
+```

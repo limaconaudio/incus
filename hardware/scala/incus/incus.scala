@@ -1,6 +1,5 @@
 package incus
 
-
 import vexriscv.plugin._
 import vexriscv._
 import vexriscv.ip.{DataCacheConfig, InstructionCacheConfig}
@@ -14,7 +13,6 @@ import spinal.lib.misc.HexTools
 import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
 
 import scala.collection.mutable.ArrayBuffer
-
 
 case class IncusConfig(axiFrequency : HertzNumber,
                        onChipRamSize : BigInt,
@@ -293,6 +291,17 @@ object Incus{
     val config = SpinalConfig()
     config.generateVerilog({
       val toplevel = new Incus(IncusConfig.default)
+      toplevel
+    })
+  }
+}
+
+object IncusWithMemoryInit{
+  def main(args: Array[String]) {
+    val config = SpinalConfig()
+    config.generateVerilog({
+      val toplevel = new Incus(IncusConfig.default)
+      HexTools.initRam(toplevel.axi.ram.ram, "software/test/resource/uart.hex", 0x80000000l)
       toplevel
     })
   }
