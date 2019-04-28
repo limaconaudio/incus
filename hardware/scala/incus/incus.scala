@@ -300,3 +300,39 @@ object IncusWithMemoryInit{
     })
   }
 }
+
+case class IncusArty(config : IncusConfig) extends Component{
+  val io = new Bundle {
+    val CLK = in Bool()
+    val TXD = out Bool()
+    val RXD = in Bool()
+    val LED = out Bits(4 bits)
+  }.setName("")
+
+  val soc = new Incus(config)
+  HexTools.initRam(soc.axi.ram.ram, "software/test/resource/uart.hex", 0x80000000l)
+
+  soc.io.axiClk   <> io.CLK
+  soc.io.asyncReset <> False
+
+  soc.io.uart.txd <> io.TXD
+  soc.io.uart.rxd <> io.RXD
+
+  soc.io.gpioA.read := B"0000"
+  io.LED := soc.io.gpioA.write
+
+  soc.io.timerExternal.clear := False
+  soc.io.timerExternal.tick := False
+  soc.io.coreInterrupt := False
+}
+
+//Scala main used to generate the toplevel
+object IncusArty{
+  def main(args: Array[String]) {
+    val config = SpinalConfig()
+    config.generateVerilog({
+      val toplevel = IncusArty(IncusConfig.default)
+      toplevel
+    })
+  }
+}
