@@ -8,7 +8,7 @@ import spinal.lib._
 import spinal.lib.bus.amba3.apb._
 import spinal.lib.bus.amba4.axi._
 import spinal.lib.com.uart.{Apb3UartCtrl, Uart, UartCtrlGenerics, UartCtrlMemoryMappedConfig}
-import spinal.lib.io.TriStateArray
+import spinal.lib.io.{Apb3Gpio2, Gpio, TriStateArray}
 import spinal.lib.misc.HexTools
 import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
 
@@ -16,6 +16,7 @@ import scala.collection.mutable.ArrayBuffer
 
 case class IncusConfig(axiFrequency : HertzNumber,
                        onChipRamSize : BigInt,
+                       gpioA : Gpio.Parameter,
                        cpuPlugins : ArrayBuffer[Plugin[VexRiscv]],
                        uartCtrlConfig : UartCtrlMemoryMappedConfig)
 
@@ -25,6 +26,9 @@ object IncusConfig{
     val config = IncusConfig(
       axiFrequency = 100 MHz,
       onChipRamSize  = 8 kB,
+      gpioA = Gpio.Parameter(
+        width = 4
+      ),
       uartCtrlConfig = UartCtrlMemoryMappedConfig(
         uartCtrlConfig = UartCtrlGenerics(
           dataWidthMax      = 8,
@@ -148,8 +152,7 @@ class Incus(config: IncusConfig) extends Component{
     val axiClk     = in Bool
 
     //Peripherals IO
-    val gpioA         = master(TriStateArray(32 bits))
-    val gpioB         = master(TriStateArray(32 bits))
+    val gpioA         = master(TriStateArray(4 bits))
     val uart          = master(Uart())
     val timerExternal = in(PinsecTimerCtrlExternal())
     val coreInterrupt = in Bool
@@ -200,14 +203,7 @@ class Incus(config: IncusConfig) extends Component{
       idWidth      = 4
     )
 
-    val gpioACtrl = Apb3Gpio(
-      gpioWidth = 32,
-      withReadSync = true
-    )
-    val gpioBCtrl = Apb3Gpio(
-      gpioWidth = 32,
-      withReadSync = true
-    )
+    val gpioACtrl = Apb3Gpio2(config.gpioA)
     val timerCtrl = PinsecTimerCtrl()
 
 
@@ -272,8 +268,7 @@ class Incus(config: IncusConfig) extends Component{
     val apbDecoder = Apb3Decoder(
       master = apbBridge.io.apb,
       slaves = List(
-        gpioACtrl.io.apb -> (0x00000, 4 kB),
-        gpioBCtrl.io.apb -> (0x01000, 4 kB),
+        gpioACtrl.io.bus -> (0x00000, 4 kB),
         uartCtrl.io.apb  -> (0x10000, 4 kB),
         timerCtrl.io.apb -> (0x20000, 4 kB)
       )
@@ -281,7 +276,6 @@ class Incus(config: IncusConfig) extends Component{
   }
 
   io.gpioA          <> axi.gpioACtrl.io.gpio
-  io.gpioB          <> axi.gpioBCtrl.io.gpio
   io.timerExternal  <> axi.timerCtrl.io.external
   io.uart           <> axi.uartCtrl.io.uart
 }
