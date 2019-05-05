@@ -10,7 +10,6 @@ import spinal.lib.bus.amba4.axi._
 import spinal.lib.com.uart.{Apb3UartCtrl, Uart, UartCtrlGenerics, UartCtrlMemoryMappedConfig}
 import spinal.lib.io.{Apb3Gpio2, Gpio, TriStateArray}
 import spinal.lib.misc.HexTools
-import spinal.lib.soc.pinsec.{PinsecTimerCtrl, PinsecTimerCtrlExternal}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -154,7 +153,6 @@ class Incus(config: IncusConfig) extends Component{
     //Peripherals IO
     val gpioA         = master(TriStateArray(4 bits))
     val uart          = master(Uart())
-    val timerExternal = in(PinsecTimerCtrlExternal())
     val coreInterrupt = in Bool
   }
 
@@ -204,8 +202,7 @@ class Incus(config: IncusConfig) extends Component{
     )
 
     val gpioACtrl = Apb3Gpio2(config.gpioA)
-    val timerCtrl = PinsecTimerCtrl()
-
+    val machineTimer = MachineTimer()
 
     val uartCtrl = Apb3UartCtrl(uartCtrlConfig)
 
@@ -222,7 +219,8 @@ class Incus(config: IncusConfig) extends Component{
         case plugin : DBusCachedPlugin => dBus = plugin.dBus.toAxi4Shared(true)
         case plugin : CsrPlugin        => {
           plugin.externalInterrupt := BufferCC(io.coreInterrupt)
-          plugin.timerInterrupt := timerCtrl.io.interrupt
+//          plugin.timerInterrupt := machineTimer.io.mTimeInterrupt
+          plugin.timerInterrupt := False
         }
         case _ =>
       }
@@ -269,14 +267,13 @@ class Incus(config: IncusConfig) extends Component{
       master = apbBridge.io.apb,
       slaves = List(
         gpioACtrl.io.bus -> (0x00000, 4 kB),
-        uartCtrl.io.apb  -> (0x10000, 4 kB),
-        timerCtrl.io.apb -> (0x20000, 4 kB)
+	machineTimer.io.bus -> (0x08000, 4 kB),
+        uartCtrl.io.apb  -> (0x10000, 4 kB)
       )
     )
   }
 
   io.gpioA          <> axi.gpioACtrl.io.gpio
-  io.timerExternal  <> axi.timerCtrl.io.external
   io.uart           <> axi.uartCtrl.io.uart
 }
 
@@ -321,8 +318,6 @@ case class IncusArty(config : IncusConfig) extends Component{
   soc.io.gpioA.read := B"0000"
   io.LED := soc.io.gpioA.write
 
-  soc.io.timerExternal.clear := False
-  soc.io.timerExternal.tick := False
   soc.io.coreInterrupt := False
 }
 
