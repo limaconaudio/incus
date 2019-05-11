@@ -45,6 +45,7 @@ obj_dir
 *.tcl
 *.o
 *.bin
+*.mem
 
 simWorkspace/
 tmp/
