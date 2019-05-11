@@ -6,7 +6,7 @@ Incus is a 32bit RISC-V SoC based on SpinalHDL/VexRiscv.
 
 - 32bit RISC-V CPU
 - 8 KB on-chip RAM
-- Timer
+- Machine Timer
 - GPIO
 - UART
 
@@ -18,13 +18,30 @@ Below command will generate verilog for the Incus SoC:
 $ sbt "runMain incus.Incus"
 ```
 
-## Simulation
+## Memory Map
+
+| Peripheral        | Memory Map |
+|-------------------|------------|
+|   GPIO            | 0xF0000000 |
+|   Machine Timer   | 0xF0008000 |
+|   UART            | 0xF0010000 |
+
+## Software
+
+This repo contains some C programs for testing the Incus SoC. Those
+can be found in:
+
+```
+software/c/
+```
+
+## Verilator Simulation
 
 This repo contains some verilator simulations for Incus SoC. Those
 can be found in:
 
 ```
-software/test/incus/
+software/verilator/incus/
 ```
 For running the simulation:
 
