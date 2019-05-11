@@ -307,7 +307,7 @@ case class IncusArty(config : IncusConfig) extends Component{
   }.setName("")
 
   val soc = new Incus(config)
-  HexTools.initRam(soc.axi.ram.ram, "software/test/resource/uart.hex", 0x80000000l)
+  HexTools.initRam(soc.axi.ram.ram, "software/c/timer/build/timer.hex", 0x80000000l)
 
   soc.io.axiClk   <> io.CLK
   soc.io.asyncReset <> False
