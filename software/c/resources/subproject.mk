@@ -1,5 +1,5 @@
 ifeq ($(DEBUG),yes)
-	CFLAGS += -g3 -O0 
+	CFLAGS += -g3 -O0 -Wall -Wextra -Wno-unused-function
 endif
 
 ifeq ($(DEBUG),no)

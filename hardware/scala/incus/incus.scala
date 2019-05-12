@@ -219,8 +219,7 @@ class Incus(config: IncusConfig) extends Component{
         case plugin : DBusCachedPlugin => dBus = plugin.dBus.toAxi4Shared(true)
         case plugin : CsrPlugin        => {
           plugin.externalInterrupt := BufferCC(io.coreInterrupt)
-//          plugin.timerInterrupt := machineTimer.io.mTimeInterrupt
-          plugin.timerInterrupt := False
+          plugin.timerInterrupt := machineTimer.io.mTimeInterrupt
         }
         case _ =>
       }
