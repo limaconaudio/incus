@@ -1,30 +1,38 @@
-# Incus
+# Incus SoC
 
-Incus is a 32bit RISC-V SoC based on SpinalHDL/VexRiscv.
+Incus is a 32bit RISC-V SoC based on SpinalHDL/VexRiscv derived from [SaxonSoc](https://github.com/SpinalHDL/SaxonSoc).
 
 ## SoC Design
 
 - 32bit RISC-V CPU
-- 8 KB on-chip RAM
+- 128 KB on-board SPRAM
 - Machine Timer
 - GPIO
 - UART
+- PLIC
+- JTAG
+
+## Supported Boards
+
+- [Ice40up5kbevn](https://www.latticesemi.com/en/Products/DevelopmentBoardsAndKits/iCE40UltraPlusBreakoutBoard)
 
 ## Building
 
-Below command will generate verilog for the Incus SoC:
+Below command will generate Incus SoC verilog for Ice40Up5kbevn:
 
 ```shell
-$ sbt "runMain incus.Incus"
+$ sbt "runMain incus.board.Ice40up5kbevn.Ice40up5kbevn"
 ```
 
 ## Memory Map
 
 | Peripheral        | Memory Map |
 |-------------------|------------|
-|   GPIO            | 0xF0000000 |
-|   Machine Timer   | 0xF0008000 |
-|   UART            | 0xF0010000 |
+|   RAM             | 0x80000000 |
+|   GPIO            | 0x10000000 |
+|   Machine Timer   | 0x10008000 |
+|   UART            | 0x10010000 |
+|   PLIC            | 0x10C00000 |
 
 ## Software
 
@@ -32,20 +40,15 @@ This repo contains some C programs for testing the Incus SoC. Those
 can be found in:
 
 ```
-software/c/
+software/
 ```
 
-## Verilator Simulation
-
-This repo contains some verilator simulations for Incus SoC. Those
-can be found in:
+For instance, below commands can be used to build and flash [hello_world](software/standalone/hello_world) example on Ice40up5kbevn:
 
 ```
-software/verilator/incus/
+$ cd software/standalone/hello_world
+$ make
+$ make prog
 ```
-For running the simulation:
 
-```shell
-$ cd software/test/incus/
-$ make clean run
-```
+Serial port is available on pins 18 and 20 of J3 header on Ice40Up5kbevn.

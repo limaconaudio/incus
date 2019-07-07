@@ -16,3 +16,5 @@ lazy val root = (project in file(".")).
 lazy val vexRiscv = RootProject(file("../VexRiscv"))
 
 fork := true
+
+connectInput in run := true
